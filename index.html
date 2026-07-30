@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Life OS</title>
+<meta name="theme-color" content="#2F4A3E">
+<meta name="description" content="Life OS — your personal archive for days and what you've learned.">
+
+<!-- PWA install -->
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-apple-touch.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Life OS">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================= TOKENS ============================= */
+:root{
+  --forest:#2F4A3E;
+  --forest-deep:#1C2C25;
+  --forest-soft:#4E6E5D;
+  --water:#4E86A8;
+  --water-soft:#8FBBD1;
+  --white:#FFFFFF;
+  --bg-base:#F4F5F0;
+  --ink:#1C2420;
+  --ink-muted:#5C6862;
+  --ink-faint:#93A099;
+  --glass:rgba(255,255,255,0.65);
+  --glass-strong:rgba(255,255,255,0.86);
+  --glass-border:rgba(255,255,255,0.75);
+  --hairline:rgba(28,40,32,0.08);
+  --shadow:0 10px 34px rgba(28,44,36,0.10);
+  --r-lg:28px;
+  --r-md:20px;
+  --r-sm:14px;
+  --font-display:'Fraunces',Georgia,serif;
+  --font-ui:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  --nav-h:80px;
+  --photo-hero: url('https://images.pexels.com/photos/3998711/pexels-photo-3998711.jpeg?auto=compress&cs=tinysrgb&w=1000');
+  --icon-1:#4E86A8; --icon-1-bg:rgba(78,134,168,0.14);
+  --icon-2:#7A6FC4; --icon-2-bg:rgba(122,111,196,0.14);
+  --icon-3:#C48A4E; --icon-3-bg:rgba(196,138,78,0.14);
+  --icon-4:#5FA36B; --icon-4-bg:rgba(95,163,107,0.14);
+}
+:root.dark{
+  --forest:#8FC4A8;
+  --bg-base:#121815;
+  --ink:#EDF2EE;
+  --ink-muted:#A6B3AC;
+  --ink-faint:#657069;
+  --glass:rgba(28,40,34,0.60);
+  --glass-strong:rgba(28,40,34,0.84);
+  --glass-border:rgba(255,255,255,0.10);
+  --hairline:rgba(255,255,255,0.08);
+  --shadow:0 10px 40px rgba(0,0,0,0.4);
+}
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body{ height:100%; }
+body{
+  margin:0; color:var(--ink); font-family:var(--font-ui); font-size:15.5px; line-height:1.55;
+  background:var(--bg-base); -webkit-font-smoothing:antialiased; overscroll-behavior-y:none;
+  transition:background .5s ease, color .5s ease;
+}
+@media (prefers-reduced-motion:reduce){ *{ animation-duration:.001ms !important; transition-duration:.001ms !important; } }
+button,input,textarea,select{ font-family:inherit; color:inherit; }
+button{ cursor:pointer; }
+h1,h2,h3{ margin:0; font-weight:500; letter-spacing:-0.01em; }
+p{ margin:0; }
+::-webkit-scrollbar{ width:0; height:0; }
+::selection{ background:rgba(78,134,168,0.25); }
+button:focus-visible, input:focus-visible, textarea:focus-visible, [tabindex]:focus-visible{
+  outline:2px solid var(--water); outline-offset:2px; border-radius:8px;
+}
+
+/* ============================= AMBIENT BACKGROUND ============================= */
+.fog-layer{ position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
+.blob{ position:absolute; border-radius:50%; filter:blur(80px); opacity:.22; will-change:transform; }
+.blob-1{ width:50vh; height:50vh; background:radial-gradient(circle, var(--forest-soft), transparent 70%); top:-16vh; left:-16vh; animation:drift1 50s ease-in-out infinite; }
+.blob-2{ width:44vh; height:44vh; background:radial-gradient(circle, var(--water-soft), transparent 70%); bottom:-10vh; right:-18vh; animation:drift2 58s ease-in-out infinite; }
+:root.dark .blob{ opacity:.16; }
+@keyframes drift1{ 0%,100%{transform:translate(0,0);} 50%{transform:translate(5vw,6vh);} }
+@keyframes drift2{ 0%,100%{transform:translate(0,0);} 50%{transform:translate(-6vw,5vh);} }
+
+/* ============================= HERO PHOTO (Home) ============================= */
+.hero-photo{
+  position:relative; margin:0 -20px; padding:56px 20px 30px; border-radius:0 0 var(--r-lg) var(--r-lg);
+  background-image: linear-gradient(180deg, rgba(10,20,15,0.15) 0%, rgba(8,16,12,0.55) 62%, var(--bg-base) 100%), var(--photo-hero);
+  background-size:cover; background-position:center 30%; color:#fff; overflow:hidden;
+}
+.hero-photo .greeting{ color:#fff; }
+.hero-photo .date{ color:rgba(255,255,255,0.82); }
+.hero-photo .hero-line{ font-family:var(--font-display); font-style:italic; font-size:17.5px; color:rgba(255,255,255,0.92); margin-top:16px; max-width:88%; line-height:1.4; }
+.hero-photo .btn-primary{ background:rgba(255,255,255,0.95); color:var(--forest-deep); margin-top:22px; }
+:root.dark .hero-photo{ background-image: linear-gradient(180deg, rgba(6,12,9,0.25) 0%, rgba(6,12,9,0.72) 65%, var(--bg-base) 100%), var(--photo-hero); }
+
+#app{ position:relative; z-index:1; max-width:560px; margin:0 auto; min-height:100%; padding-bottom:calc(var(--nav-h) + 20px); }
+.screen{ padding:0 20px; animation:fadeIn .4s ease; }
+@keyframes fadeIn{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;} }
+.hidden{ display:none !important; }
+
+/* ============================= TOPBAR ============================= */
+.topbar{
+  position:sticky; top:0; z-index:20; backdrop-filter:blur(22px) saturate(160%); -webkit-backdrop-filter:blur(22px) saturate(160%);
+  background:var(--glass); border-bottom:1px solid var(--hairline);
+  padding:18px 20px 15px; display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.topbar .title{ font-family:var(--font-display); font-style:italic; font-weight:500; font-size:21px; color:var(--forest); }
+.icon-btn{
+  width:40px; height:40px; border-radius:50%; border:1px solid var(--glass-border); background:var(--glass-strong);
+  display:flex; align-items:center; justify-content:center; color:var(--ink-muted); flex:none;
+  transition:transform .15s, background .2s; box-shadow:var(--shadow);
+}
+.icon-btn:active{ transform:scale(0.92); }
+.icon-btn svg{ width:17px; height:17px; }
+
+/* ============================= BOTTOM NAV ============================= */
+nav.bottomnav{ position:fixed; left:0; right:0; bottom:0; z-index:30; display:flex; justify-content:center;
+  padding:10px 14px calc(10px + env(safe-area-inset-bottom)); pointer-events:none; }
+.navwrap{
+  pointer-events:auto; display:flex; width:100%; max-width:520px; justify-content:space-between;
+  background:var(--glass-strong); backdrop-filter:blur(24px) saturate(180%); -webkit-backdrop-filter:blur(24px) saturate(180%);
+  border:1px solid var(--glass-border); border-radius:26px; padding:7px; box-shadow:var(--shadow);
+}
+.navbtn{ flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; border:none; background:transparent;
+  padding:6px 2px 8px; border-radius:18px; color:var(--ink-faint); font-size:10.5px; font-weight:500; transition:all .2s; }
+.navbtn svg{ width:18px; height:18px; }
+.navbtn .navicon{ width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; transition:all .2s; }
+.navbtn.active{ color:var(--forest); font-weight:600; }
+.navbtn.active .navicon{ background:linear-gradient(135deg, var(--forest), var(--water)); color:#fff; }
+
+/* ============================= GLASS CARDS ============================= */
+.card{
+  background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--r-lg);
+  padding:22px; margin-bottom:14px; backdrop-filter:blur(18px) saturate(160%); -webkit-backdrop-filter:blur(18px) saturate(160%);
+  box-shadow:var(--shadow);
+}
+.card-tight{ padding:16px 18px; }
+.section-label{ font-size:11.5px; text-transform:uppercase; letter-spacing:.09em; color:var(--ink-faint); font-weight:600; margin:28px 2px 10px; }
+.section-label:first-child{ margin-top:8px; }
+.muted{ color:var(--ink-muted); }
+.faint{ color:var(--ink-faint); }
+.display{ font-family:var(--font-display); }
+.display-italic{ font-family:var(--font-display); font-style:italic; }
+
+.btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; border:1px solid var(--glass-border);
+  background:var(--glass-strong); color:var(--ink); padding:14px 20px; border-radius:18px; font-weight:600; font-size:14.5px;
+  transition:transform .15s, opacity .2s; backdrop-filter:blur(10px); }
+.btn:active{ transform:scale(0.97); }
+.btn-primary{ background:linear-gradient(135deg, var(--forest), var(--water)); color:#fff; border-color:transparent; }
+.btn-ghost{ background:transparent; }
+.btn-danger{ background:rgba(193,95,86,0.12); color:#C15F56; border-color:transparent; }
+.btn-full{ width:100%; }
+.btn-sm{ padding:9px 14px; font-size:12.5px; border-radius:13px; }
+
+textarea, input[type=text], input[type=date], input[type=search]{
+  width:100%; background:rgba(255,255,255,0.4); border:1px solid var(--hairline); border-radius:var(--r-sm);
+  padding:13px 14px; color:var(--ink); font-size:15px; resize:vertical; line-height:1.6;
+}
+:root.dark textarea, :root.dark input{ background:rgba(255,255,255,0.05); }
+textarea::placeholder, input::placeholder{ color:var(--ink-faint); }
+label.field-label{ display:block; font-size:13px; font-weight:600; margin:0 0 7px 2px; color:var(--ink-muted); }
+.field{ margin-bottom:18px; }
+.field-hint{ font-size:12px; color:var(--ink-faint); margin:6px 2px 0; }
+
+.divider{ height:1px; background:var(--hairline); margin:18px 0; border:none; }
+.row-between{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+
+/* ============================= HOME ============================= */
+.hero{ padding:30px 0 6px; }
+.greeting{ font-family:var(--font-display); font-style:italic; font-size:30px; font-weight:500; letter-spacing:-.01em; }
+.hero .date{ color:var(--ink-muted); font-size:14px; margin-top:6px; }
+.stat-row{ display:flex; gap:10px; margin-top:18px; }
+.stat{ flex:1; background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--r-md); padding:16px 10px; text-align:center; backdrop-filter:blur(14px); }
+.stat .num{ font-family:var(--font-display); font-size:24px; font-weight:500; color:var(--forest); }
+:root.dark .stat .num{ color:var(--forest); }
+.stat .lbl{ font-size:10.5px; color:var(--ink-faint); margin-top:3px; text-transform:uppercase; letter-spacing:.05em; }
+
+.wr-status{ display:flex; align-items:center; gap:10px; padding:14px 4px; }
+.wr-dot{ width:9px; height:9px; border-radius:50%; background:var(--ink-faint); flex:none; }
+.wr-dot.done{ background:var(--water); }
+.wr-text{ font-size:13.5px; }
+
+.activity-item{ display:flex; gap:12px; padding:14px 0; border-bottom:1px solid var(--hairline); }
+.activity-item:last-child{ border-bottom:none; }
+.activity-item .a-title{ font-size:13.5px; font-weight:600; }
+.activity-item .a-body{ font-size:13px; color:var(--ink-muted); margin-top:2px; }
+.activity-item .a-meta{ font-size:11px; color:var(--ink-faint); margin-top:3px; }
+
+.empty-state{ text-align:center; padding:50px 20px; color:var(--ink-faint); }
+.empty-state .e-icon{ font-size:32px; margin-bottom:10px; opacity:.7; }
+.empty-state .e-title{ color:var(--ink-muted); font-weight:600; font-size:14.5px; margin-bottom:4px; }
+.empty-state .e-body{ font-size:13px; max-width:280px; margin:0 auto; }
+
+/* ============================= JOURNAL ============================= */
+.datenav{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin:16px 0 4px; }
+.datenav .dbtn{ width:38px; height:38px; border-radius:50%; border:1px solid var(--glass-border); background:var(--glass); flex:none; display:flex; align-items:center; justify-content:center; }
+.datenav .dcenter{ text-align:center; flex:1; }
+.datenav .dcenter .dtop{ font-size:15px; font-weight:600; }
+.datenav .dcenter .dsub{ font-size:11.5px; color:var(--ink-faint); margin-top:1px; }
+.journal-prompt{ font-family:var(--font-display); font-style:italic; font-size:24px; margin:26px 2px 14px; line-height:1.3; }
+.journal-textarea{ min-height:46vh; font-size:16.5px; line-height:1.75; border-radius:var(--r-lg); padding:20px; }
+.saved-pill{ display:inline-block; font-size:11.5px; color:var(--ink-faint); margin-top:12px; }
+
+/* ============================= LIST ITEMS ============================= */
+.list-item{ background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--r-md); padding:16px 17px;
+  margin-bottom:10px; backdrop-filter:blur(14px); transition:transform .15s; }
+.list-item:active{ transform:scale(0.985); }
+.k-icon{ width:42px; height:42px; border-radius:14px; background:var(--icbg,var(--icon-1-bg)); color:var(--ic,var(--icon-1));
+  display:flex; align-items:center; justify-content:center; font-size:19px; flex:none; }
+.li-title{ font-weight:600; font-size:15px; }
+.li-desc{ font-size:13px; color:var(--ink-muted); margin-top:6px; line-height:1.5; }
+.li-meta{ font-size:11px; color:var(--ink-faint); margin-top:8px; }
+.searchbar-row{ display:flex; gap:8px; margin-bottom:14px; }
+.searchbar-row input{ flex:1; }
+
+/* ============================= SHEET ============================= */
+.sheet-backdrop{ position:fixed; inset:0; background:rgba(20,30,25,0.45); backdrop-filter:blur(3px); z-index:50; display:flex; align-items:flex-end; animation:fadeIn .25s ease; }
+.sheet{ background:var(--glass-strong); backdrop-filter:blur(30px) saturate(180%); -webkit-backdrop-filter:blur(30px) saturate(180%);
+  width:100%; max-width:560px; margin:0 auto; border-radius:30px 30px 0 0; max-height:90vh; overflow-y:auto;
+  padding:10px 20px calc(30px + env(safe-area-inset-bottom)); border-top:1px solid var(--glass-border); box-shadow:0 -10px 40px rgba(0,0,0,0.2); }
+.sheet-handle{ width:38px; height:4px; background:var(--hairline); border-radius:4px; margin:8px auto 16px; }
+.sheet-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+.sheet-head h3{ font-family:var(--font-display); font-size:20px; font-weight:500; }
+
+/* ============================= ARCHIVE ============================= */
+.tl-year{ font-family:var(--font-display); font-size:26px; font-weight:500; margin:8px 0 16px; }
+.tl-month-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.tl-month-cell{ background:var(--glass); border:1px solid var(--glass-border); border-radius:18px; padding:18px 8px; text-align:center; backdrop-filter:blur(14px); }
+.tl-month-cell .mname{ font-size:13px; font-weight:600; }
+.tl-month-cell .mcount{ font-size:10.5px; color:var(--ink-faint); margin-top:4px; }
+.tl-month-cell.has-data{ border-color:rgba(78,134,168,0.4); background:rgba(78,134,168,0.10); }
+.week-row{ display:flex; align-items:center; gap:12px; padding:16px 17px; }
+.week-row .wtitle{ font-weight:600; font-size:14.5px; }
+.week-row .wsub{ font-size:12px; color:var(--ink-faint); margin-top:3px; }
+.ai-badge{ font-size:10px; padding:3px 9px; border-radius:100px; background:rgba(78,134,168,0.15); color:var(--water); font-weight:600; flex:none; }
+.tl-day-row{ display:flex; align-items:flex-start; gap:12px; padding:13px 0; border-bottom:1px solid var(--hairline); }
+.tl-day-row:last-child{ border-bottom:none; }
+.tl-day-num{ width:36px; text-align:center; font-family:var(--font-display); font-size:18px; font-weight:500; flex:none; padding-top:1px; }
+.tl-day-body{ flex:1; }
+.ai-prompt-box{ background:rgba(0,0,0,0.03); border:1px dashed var(--hairline); border-radius:16px; padding:15px; font-size:12.5px; color:var(--ink-muted); white-space:pre-wrap; font-family:ui-monospace,monospace; max-height:220px; overflow-y:auto; }
+:root.dark .ai-prompt-box{ background:rgba(255,255,255,0.03); }
+.summary-box{ background:rgba(78,134,168,0.08); border-radius:16px; padding:16px; font-size:13.5px; line-height:1.6; white-space:pre-wrap; }
+
+/* ============================= SETTINGS ============================= */
+.switch{ width:48px; height:28px; border-radius:100px; background:rgba(0,0,0,0.08); border:1px solid var(--hairline); position:relative; flex:none; }
+:root.dark .switch{ background:rgba(255,255,255,0.08); }
+.switch::after{ content:''; position:absolute; top:2px; left:2px; width:22px; height:22px; border-radius:50%; background:var(--ink-faint); transition:all .2s; }
+.switch.on{ background:rgba(78,134,168,0.25); border-color:var(--water); }
+.switch.on::after{ left:22px; background:var(--water); }
+.settings-row{ display:flex; align-items:center; justify-content:space-between; padding:16px 2px; border-bottom:1px solid var(--hairline); }
+.settings-row:last-child{ border-bottom:none; }
+.settings-row .s-title{ font-size:14.5px; font-weight:600; }
+.settings-row .s-sub{ font-size:12px; color:var(--ink-faint); margin-top:2px; }
+
+/* toast */
+#toast{ position:fixed; bottom:calc(var(--nav-h) + 26px); left:50%; transform:translateX(-50%) translateY(8px);
+  background:var(--forest); color:#fff; padding:12px 20px; border-radius:100px; font-size:13px; font-weight:600;
+  opacity:0; pointer-events:none; transition:opacity .25s, transform .25s; z-index:100; box-shadow:var(--shadow); }
+#toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="fog-layer" aria-hidden="true">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="title">Life OS</div>
+    <button class="icon-btn" id="searchOpenBtn" aria-label="Search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </button>
+  </div>
+
+  <section class="screen" id="screen-home"></section>
+  <section class="screen hidden" id="screen-journal"></section>
+  <section class="screen hidden" id="screen-knowledge"></section>
+  <section class="screen hidden" id="screen-archive"></section>
+  <section class="screen hidden" id="screen-settings"></section>
+</div>
+
+<nav class="bottomnav">
+  <div class="navwrap">
+    <button class="navbtn" data-tab="home"><span class="navicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg></span>Home</button>
+    <button class="navbtn" data-tab="journal"><span class="navicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5A2.5 2.5 0 016.5 2H20v18H6.5A2.5 2.5 0 014 17.5v-13z"/><path d="M4 17.5A2.5 2.5 0 016.5 15H20"/></svg></span>Journal</button>
+    <button class="navbtn" data-tab="knowledge"><span class="navicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10.5 5 8 4 5 4v14c3 0 5.5 1 7 2.5C13.5 19 16 18 19 18V4c-3 0-5.5 1-7 2.5z"/><path d="M12 6.5V21"/></svg></span>Knowledge</button>
+    <button class="navbtn" data-tab="archive"><span class="navicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></span>Archive</button>
+    <button class="navbtn" data-tab="settings"><span class="navicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a1.7 1.7 0 000-3l-1.2-.5a7.4 7.4 0 00-.7-1.7l.5-1.2a1.7 1.7 0 00-2.4-2.4l-1.2.5a7.4 7.4 0 00-1.7-.7l-.5-1.2a1.7 1.7 0 00-3 0l-.5 1.2a7.4 7.4 0 00-1.7.7l-1.2-.5a1.7 1.7 0 00-2.4 2.4l.5 1.2a7.4 7.4 0 00-.7 1.7l-1.2.5a1.7 1.7 0 000 3l1.2.5c.16.6.4 1.17.7 1.7l-.5 1.2a1.7 1.7 0 002.4 2.4l1.2-.5c.53.3 1.1.54 1.7.7l.5 1.2a1.7 1.7 0 003 0l.5-1.2c.6-.16 1.17-.4 1.7-.7l1.2.5a1.7 1.7 0 002.4-2.4l-.5-1.2c.3-.53.54-1.1.7-1.7l1.2-.5z"/></svg></span>Settings</button>
+  </div>
+</nav>
+
+<div id="toast"></div>
+
+<script>
+/* =====================================================================
+   LIFE OS v1.0 — personal archive for days and what you've learned.
+   Vanilla JS + IndexedDB. Offline-first. No login. No backend. No AI API.
+===================================================================== */
+
+/* ---------------- IndexedDB layer ---------------- */
+const DB_NAME='reflectDB', DB_VERSION=2;
+let dbInstance=null;
+function openDB(){
+  return new Promise((resolve,reject)=>{
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = (e)=>{
+      const db = e.target.result;
+      if(!db.objectStoreNames.contains('journal')) db.createObjectStore('journal', {keyPath:'date'});
+      if(!db.objectStoreNames.contains('knowledge')) db.createObjectStore('knowledge', {keyPath:'id'});
+      if(!db.objectStoreNames.contains('quotes')) db.createObjectStore('quotes', {keyPath:'id'});
+      if(!db.objectStoreNames.contains('weeklyReviews')) db.createObjectStore('weeklyReviews', {keyPath:'id'});
+      if(!db.objectStoreNames.contains('monthlyReviews')) db.createObjectStore('monthlyReviews', {keyPath:'id'});
+      if(!db.objectStoreNames.contains('settings')) db.createObjectStore('settings', {keyPath:'key'});
+    };
+    req.onsuccess = (e)=>{ dbInstance = e.target.result; resolve(dbInstance); };
+    req.onerror = (e)=>reject(e);
+  });
+}
+function tx(store, mode='readonly'){ return dbInstance.transaction(store, mode).objectStore(store); }
+function dbGet(store,key){ return new Promise((res,rej)=>{ const r=tx(store).get(key); r.onsuccess=()=>res(r.result||null); r.onerror=()=>rej(r.error); }); }
+function dbGetAll(store){ return new Promise((res,rej)=>{ const r=tx(store).getAll(); r.onsuccess=()=>res(r.result||[]); r.onerror=()=>rej(r.error); }); }
+function dbPut(store,val){ return new Promise((res,rej)=>{ const r=tx(store,'readwrite').put(val); r.onsuccess=()=>res(val); r.onerror=()=>rej(r.error); }); }
+function dbDelete(store,key){ return new Promise((res,rej)=>{ const r=tx(store,'readwrite').delete(key); r.onsuccess=()=>res(); r.onerror=()=>rej(r.error); }); }
+function dbClearAll(){
+  return Promise.all(['journal','knowledge','quotes','weeklyReviews','monthlyReviews'].map(s=>
+    new Promise((res,rej)=>{ const r=tx(s,'readwrite').clear(); r.onsuccess=()=>res(); r.onerror=()=>rej(r.error); })
+  ));
+}
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+
+/* ---------------- Helpers ---------------- */
+function todayISO(d=new Date()){ const off=d.getTimezoneOffset(); const local=new Date(d.getTime()-off*60000); return local.toISOString().slice(0,10); }
+function fmtDateLong(iso){ const d=new Date(iso+'T00:00:00'); return d.toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric', year:'numeric'}); }
+function fmtDateShort(iso){ const d=new Date(iso+'T00:00:00'); return d.toLocaleDateString(undefined,{month:'short', day:'numeric'}); }
+function addDays(iso,n){ const d=new Date(iso+'T00:00:00'); d.setDate(d.getDate()+n); return todayISO(d); }
+function esc(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function truncate(s,n){ if(!s) return ''; return s.length>n ? s.slice(0,n).trim()+'…' : s; }
+function showToast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(showToast._t); showToast._t=setTimeout(()=>t.classList.remove('show'),2200);
+}
+function emptyState(icon,title,body){
+  return `<div class="empty-state"><div class="e-icon">${icon}</div><div class="e-title">${title}</div><div class="e-body">${body}</div></div>`;
+}
+function daysInMonth(y,m){ return new Date(y,m+1,0).getDate(); }
+function weekChunks(y,m){
+  const total = daysInMonth(y,m);
+  const chunks = [];
+  for(let start=1; start<=total; start+=7){
+    const end = Math.min(start+6, total);
+    chunks.push({start, end});
+  }
+  return chunks;
+}
+function pad2(n){ return String(n).padStart(2,'0'); }
+function isoOf(y,m,day){ return `${y}-${pad2(m+1)}-${pad2(day)}`; }
+
+/* ---------------- App State ---------------- */
+const State = {
+  tab:'home',
+  journalDate: todayISO(),
+  knowledgeSearch:'',
+  archiveYear: new Date().getFullYear(), archiveMonth:null, archiveWeek:null
+};
+
+/* ---------------- Router ---------------- */
+function setTab(tab){
+  State.tab = tab;
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  document.getElementById('screen-'+tab).classList.remove('hidden');
+  document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  render();
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('.navbtn').forEach(b=> b.addEventListener('click', ()=>setTab(b.dataset.tab)) );
+
+async function render(){
+  if(State.tab==='home') await renderHome();
+  else if(State.tab==='journal') await renderJournal();
+  else if(State.tab==='knowledge') await renderKnowledge();
+  else if(State.tab==='archive') await renderArchive();
+  else if(State.tab==='settings') await renderSettings();
+}
+
+/* ============================= HOME ============================= */
+const REFLECTIVE_LINES = [
+  "Today is another page in your story.",
+  "Small moments, written down, become a life understood.",
+  "You don't have to have it figured out — just write it down.",
+  "Every entry is a conversation with your future self.",
+  "Not every day needs a lesson. Some just need to be remembered."
+];
+async function renderHome(){
+  const el = document.getElementById('screen-home');
+  const [journals, knowledge, s] = await Promise.all([dbGetAll('journal'), dbGetAll('knowledge'), dbGet('settings','app')]);
+  const hour = new Date().getHours();
+  const greetWord = hour<5 ? 'Still up' : hour<12 ? 'Good morning' : hour<18 ? 'Good afternoon' : 'Good evening';
+  const name = s && s.name ? s.name.trim() : '';
+
+  journals.sort((a,b)=> a.date<b.date?1:-1);
+  knowledge.sort((a,b)=> (b.date||'').localeCompare(a.date||''));
+  const hasToday = journals.some(j=>j.date===todayISO());
+
+  const now = new Date();
+  const monthEntries = journals.filter(j=> j.date.slice(0,7) === `${now.getFullYear()}-${pad2(now.getMonth()+1)}`);
+
+  const weekly = await dbGetAll('weeklyReviews');
+  const currentWeek = weekly.find(w=> todayISO()>=w.startDate && todayISO()<=w.endDate);
+  const recentKnowledge = knowledge.slice(0,3);
+  const seed = todayISO().split('-').reduce((a,c)=>a+parseInt(c),0);
+  const line = REFLECTIVE_LINES[seed % REFLECTIVE_LINES.length];
+
+  el.innerHTML = `
+    <div class="hero-photo">
+      <div class="greeting">${greetWord}${name ? ',' : '.'}${name ? `<br>${esc(name)}.` : ''}</div>
+      <div class="date">${fmtDateLong(todayISO())}</div>
+      <div class="hero-line">"${esc(line)}"</div>
+      <button class="btn btn-primary btn-full" id="continueBtn">
+        ${hasToday ? 'Continue writing' : 'Write about today'} →
+      </button>
+    </div>
+
+    <div class="stat-row" style="margin-top:-26px; position:relative; z-index:2; padding:0 2px;">
+      <div class="stat"><div class="num">${journals.length}</div><div class="lbl">Journals</div></div>
+      <div class="stat"><div class="num">${knowledge.length}</div><div class="lbl">Knowledge</div></div>
+      <div class="stat"><div class="num">${monthEntries.length}</div><div class="lbl">This Month</div></div>
+    </div>
+
+    <div class="section-label">Weekly review</div>
+    <div class="card card-tight">
+      <div class="wr-status">
+        <div class="wr-dot ${currentWeek && currentWeek.summary ? 'done':''}"></div>
+        <div class="wr-text muted">${currentWeek ? (currentWeek.summary ? 'This week\u2019s review is saved.' : 'Prompt generated — summary not saved yet.') : 'No review generated for this week yet.'}</div>
+      </div>
+      <button class="btn btn-ghost btn-full btn-sm" id="goArchiveBtn" style="margin-top:6px;">Open Archive</button>
+    </div>
+
+    <div class="section-label">Recent knowledge</div>
+    ${!recentKnowledge.length ? `<div class="card card-tight">${emptyState('🌿','Nothing saved yet','Add a concept when something meaningful clicks.')}</div>` : recentKnowledge.map((k,i)=>`
+      <div class="list-item"><div class="row-between"><div style="flex:1;"><div class="li-title">${esc(k.title)}</div><div class="li-desc">${esc(truncate(k.description,90))}</div><div class="li-meta">${esc(k.date||'')}</div></div><div class="k-icon" style="--ic:var(--icon-${(i%4)+1}); --icbg:var(--icon-${(i%4)+1}-bg);">🌿</div></div></div>
+    `).join('')}
+  `;
+  document.getElementById('continueBtn').onclick = ()=>{ State.journalDate = todayISO(); setTab('journal'); };
+  document.getElementById('goArchiveBtn').onclick = ()=> setTab('archive');
+}
+
+/* ============================= JOURNAL ============================= */
+let journalSaveTimer=null;
+async function renderJournal(){
+  const el = document.getElementById('screen-journal');
+  const date = State.journalDate;
+  let entry = await dbGet('journal', date);
+  if(!entry) entry = { date, text:'' };
+  const isToday = date === todayISO();
+
+  el.innerHTML = `
+    <div class="datenav">
+      <button class="dbtn" id="jPrev">‹</button>
+      <div class="dcenter"><div class="dtop">${fmtDateLong(date)}</div><div class="dsub">${isToday?'Today':''}</div></div>
+      <button class="dbtn" id="jNext" ${date>=todayISO() ? 'style="visibility:hidden"' : ''}>›</button>
+    </div>
+    <div class="journal-prompt">What happened today?</div>
+    <textarea id="journalText" class="journal-textarea" placeholder="Just write. No format, no pressure.">${esc(entry.text)}</textarea>
+    <button class="btn btn-primary btn-full" id="saveJournalBtn" style="margin-top:16px;">Save</button>
+    <div class="saved-pill" id="autosaveNote">&nbsp;</div>
+  `;
+  document.getElementById('jPrev').onclick = ()=>{ State.journalDate = addDays(date,-1); renderJournal(); };
+  document.getElementById('jNext').onclick = ()=>{ if(date<todayISO()){ State.journalDate = addDays(date,1); renderJournal(); } };
+  const ta = document.getElementById('journalText');
+  ta.oninput = ()=>{
+    entry.text = ta.value;
+    document.getElementById('autosaveNote').textContent = 'Saving…';
+    clearTimeout(journalSaveTimer);
+    journalSaveTimer = setTimeout(async ()=>{
+      await dbPut('journal', entry);
+      const note = document.getElementById('autosaveNote'); if(note) note.textContent = 'Autosaved';
+    }, 700);
+  };
+  document.getElementById('saveJournalBtn').onclick = async ()=>{ entry.text = ta.value; await dbPut('journal', entry); showToast('Saved'); };
+}
+
+/* ============================= KNOWLEDGE ============================= */
+async function renderKnowledge(){
+  const el = document.getElementById('screen-knowledge');
+  let items = await dbGetAll('knowledge');
+  items.sort((a,b)=> (b.date||'').localeCompare(a.date||''));
+  el.innerHTML = `
+    <div class="searchbar-row" style="margin-top:16px;">
+      <input type="search" id="kSearch" placeholder="Search knowledge…" value="${esc(State.knowledgeSearch)}">
+      <button class="btn btn-primary" id="kAddBtn">＋</button>
+    </div>
+    <div id="kList"></div>
+  `;
+  document.getElementById('kAddBtn').onclick = ()=> openConceptSheet(null);
+  document.getElementById('kSearch').oninput = (e)=>{ State.knowledgeSearch = e.target.value; drawList(); };
+
+  function drawList(){
+    const q = State.knowledgeSearch.toLowerCase();
+    const filtered = items.filter(it=>{
+      const hay = [it.title, it.description].join(' ').toLowerCase();
+      return !q || hay.includes(q);
+    });
+    const list = document.getElementById('kList');
+    if(!filtered.length){ list.innerHTML = emptyState('🌿','Nothing saved yet','Add knowledge only when learning something meaningful.'); return; }
+    const iconSet = ['🧠','⚖️','🏛️','⏳','📚','🌿'];
+    list.innerHTML = filtered.map((it,i)=>`
+      <div class="list-item" data-id="${it.id}">
+        <div class="row-between">
+          <div class="k-icon" style="--ic:var(--icon-${(i%4)+1}); --icbg:var(--icon-${(i%4)+1}-bg);">${iconSet[i%iconSet.length]}</div>
+          <div style="flex:1;">
+            <div class="li-title">${esc(it.title)}</div>
+            <div class="li-desc">${esc(truncate(it.description,120))}</div>
+            <div class="li-meta">${esc(it.date||'')}</div>
+          </div>
+        </div>
+      </div>`).join('');
+    list.querySelectorAll('.list-item').forEach(li=> li.onclick = ()=> openConceptSheet(filtered.find(x=>x.id===li.dataset.id)) );
+  }
+  drawList();
+}
+
+function openConceptSheet(item){
+  const isNew = !item;
+  item = item || { id:uid(), title:'', description:'', date: todayISO() };
+  const backdrop = document.createElement('div'); backdrop.className='sheet-backdrop';
+  backdrop.innerHTML = `
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-head"><h3>${isNew?'New knowledge':'Edit knowledge'}</h3><button class="icon-btn" id="closeSheet">✕</button></div>
+      <div class="field"><label class="field-label">Title</label><input type="text" id="s_title" placeholder="e.g. Loss Aversion" value="${esc(item.title)}"></div>
+      <div class="field"><label class="field-label">Description</label><textarea id="s_desc" rows="5" placeholder="What is it, and why did it matter to you?">${esc(item.description)}</textarea></div>
+      <div class="field"><label class="field-label">Date</label><input type="date" id="s_date" value="${item.date}"></div>
+      <div style="display:flex; gap:10px; margin-top:8px;">
+        ${!isNew ? `<button class="btn btn-danger" id="s_delete">Delete</button>` : ''}
+        <button class="btn btn-primary btn-full" id="s_save">Save</button>
+      </div>
+    </div>`;
+  document.body.appendChild(backdrop);
+  backdrop.onclick = (e)=>{ if(e.target===backdrop) backdrop.remove(); };
+  backdrop.querySelector('#closeSheet').onclick = ()=> backdrop.remove();
+  if(!isNew) backdrop.querySelector('#s_delete').onclick = async ()=>{
+    if(confirm('Delete this knowledge entry?')){ await dbDelete('knowledge', item.id); backdrop.remove(); showToast('Deleted'); renderKnowledge(); }
+  };
+  backdrop.querySelector('#s_save').onclick = async ()=>{
+    item.title = backdrop.querySelector('#s_title').value.trim() || 'Untitled';
+    item.description = backdrop.querySelector('#s_desc').value;
+    item.date = backdrop.querySelector('#s_date').value || todayISO();
+    await dbPut('knowledge', item);
+    backdrop.remove(); showToast('Saved'); renderKnowledge();
+  };
+}
+
+/* ============================= ARCHIVE ============================= */
+async function renderArchive(){
+  const el = document.getElementById('screen-archive');
+  const journals = await dbGetAll('journal');
+
+  if(State.archiveMonth===null){
+    // ---- YEAR VIEW ----
+    const years = new Set([new Date().getFullYear()]);
+    journals.forEach(j=> years.add(parseInt(j.date.slice(0,4))));
+    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const y = State.archiveYear;
+    el.innerHTML = `
+      <div class="row-between" style="margin-top:16px;">
+        <button class="icon-btn" id="yPrev">‹</button>
+        <div class="tl-year">${y}</div>
+        <button class="icon-btn" id="yNext">›</button>
+      </div>
+      <div class="tl-month-grid">
+        ${monthNames.map((m,idx)=>{
+          const count = journals.filter(j=> j.date.slice(0,4)==String(y) && parseInt(j.date.slice(5,7))-1===idx).length;
+          return `<button class="tl-month-cell ${count?'has-data':''}" data-m="${idx}"><div class="mname">${m}</div><div class="mcount">${count?count+' days':'—'}</div></button>`;
+        }).join('')}
+      </div>`;
+    document.getElementById('yPrev').onclick = ()=>{ State.archiveYear--; renderArchive(); };
+    document.getElementById('yNext').onclick = ()=>{ State.archiveYear++; renderArchive(); };
+    el.querySelectorAll('.tl-month-cell').forEach(c=> c.onclick=()=>{ State.archiveMonth=parseInt(c.dataset.m); State.archiveWeek=null; renderArchive(); });
+
+  } else if(State.archiveWeek===null){
+    // ---- MONTH VIEW: monthly summary + weeks ----
+    const y = State.archiveYear, m = State.archiveMonth;
+    const monthKey = `${y}-${pad2(m+1)}`;
+    const monthLabel = new Date(y,m,1).toLocaleDateString(undefined,{month:'long', year:'numeric'});
+    const monthly = await dbGet('monthlyReviews', monthKey);
+    const chunks = weekChunks(y,m);
+
+    el.innerHTML = `
+      <div class="row-between" style="margin-top:16px;">
+        <button class="icon-btn" id="mBack">‹</button>
+        <div class="tl-year" style="font-size:19px;">${monthLabel}</div>
+        <div style="width:40px;"></div>
+      </div>
+
+      <div class="card card-tight">
+        <div class="row-between">
+          <div>
+            <div style="font-weight:600; font-size:14.5px;">Monthly summary</div>
+            <div class="faint" style="font-size:12px; margin-top:2px;">${monthly && monthly.summary ? 'Saved' : 'Not generated yet'}</div>
+          </div>
+          <button class="btn btn-sm btn-ghost" id="openMonthlyBtn">${monthly && monthly.summary ? 'View' : 'Generate'}</button>
+        </div>
+      </div>
+
+      <div class="section-label">Weeks</div>
+      ${chunks.map((c,i)=>{
+        const start = isoOf(y,m,c.start), end = isoOf(y,m,c.end);
+        const count = journals.filter(j=> j.date>=start && j.date<=end).length;
+        return `<div class="list-item" style="padding:0;" data-i="${i}">
+          <div class="week-row">
+            <div style="flex:1;">
+              <div class="wtitle">Week ${i+1}</div>
+              <div class="wsub">${fmtDateShort(start)} – ${fmtDateShort(end)} · ${count} ${count===1?'entry':'entries'}</div>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}
+    `;
+    document.getElementById('mBack').onclick = ()=>{ State.archiveMonth=null; renderArchive(); };
+    document.getElementById('openMonthlyBtn').onclick = ()=> openMonthlySheet(monthKey);
+    el.querySelectorAll('.list-item').forEach(li=> li.onclick = ()=>{ State.archiveWeek = parseInt(li.dataset.i); renderArchive(); });
+
+  } else {
+    // ---- WEEK VIEW: AI prompt + days ----
+    const y = State.archiveYear, m = State.archiveMonth, wi = State.archiveWeek;
+    const chunks = weekChunks(y,m);
+    const c = chunks[wi];
+    const start = isoOf(y,m,c.start), end = isoOf(y,m,c.end);
+    const weekly = (await dbGetAll('weeklyReviews')).find(w=> w.startDate===start && w.endDate===end);
+    const knowledge = await dbGetAll('knowledge');
+    const weekJournals = journals.filter(j=> j.date>=start && j.date<=end).sort((a,b)=> b.date.localeCompare(a.date));
+
+    el.innerHTML = `
+      <div class="row-between" style="margin-top:16px;">
+        <button class="icon-btn" id="wBack">‹</button>
+        <div class="tl-year" style="font-size:18px;">${fmtDateShort(start)} – ${fmtDateShort(end)}</div>
+        <div style="width:40px;"></div>
+      </div>
+      <div class="card card-tight">
+        <div class="row-between">
+          <div style="font-weight:600; font-size:14.5px;">AI summary</div>
+          <button class="btn btn-sm btn-ghost" id="openWeeklyBtn">${weekly && weekly.summary ? 'View / edit' : 'Generate'}</button>
+        </div>
+        ${weekly && weekly.summary ? `<div class="summary-box" style="margin-top:12px;">${esc(truncate(weekly.summary,220))}</div>` : `<div class="faint" style="font-size:12.5px; margin-top:8px;">Not generated yet.</div>`}
+      </div>
+
+      <div class="section-label">Days</div>
+      ${!weekJournals.length ? emptyState('🌫️','No entries this week','Days you write about will appear here.') : `<div class="card card-tight">
+        ${weekJournals.map(j=>{
+          const kCount = knowledge.filter(k=>k.date===j.date).length;
+          return `<div class="tl-day-row" data-date="${j.date}">
+            <div class="tl-day-num">${parseInt(j.date.slice(8,10))}</div>
+            <div class="tl-day-body">
+              <div style="font-size:13.5px; font-weight:600;">${esc(truncate(j.text,70) || 'Journal entry')}</div>
+              <div class="faint" style="font-size:11.5px; margin-top:3px;">${kCount ? kCount+' knowledge item'+(kCount>1?'s':'') : ''}</div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>`}
+    `;
+    document.getElementById('wBack').onclick = ()=>{ State.archiveWeek=null; renderArchive(); };
+    document.getElementById('openWeeklyBtn').onclick = ()=> openWeeklySheet(weekly, start, end);
+    el.querySelectorAll('.tl-day-row').forEach(r=> r.onclick = ()=>{ State.journalDate = r.dataset.date; setTab('journal'); });
+  }
+}
+
+async function openWeeklySheet(item, start, end){
+  const isNew = !item;
+  item = item || { id:uid(), startDate:start, endDate:end, prompt:'', summary:'', createdAt:Date.now() };
+  const [journalsInRange, knowledge] = await Promise.all([dbGetAll('journal'), dbGetAll('knowledge')]);
+  const jRange = journalsInRange.filter(j=> j.date>=start && j.date<=end);
+  const kRange = knowledge.filter(k=> k.date>=start && k.date<=end);
+
+  const backdrop = document.createElement('div'); backdrop.className='sheet-backdrop';
+  backdrop.innerHTML = `
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-head"><h3>${fmtDateShort(start)} – ${fmtDateShort(end)}</h3><button class="icon-btn" id="closeSheet">✕</button></div>
+      <button class="btn btn-ghost btn-full" id="genPromptBtn">✨ Generate AI prompt</button>
+      <div class="ai-prompt-box hidden" id="promptBox" style="margin-top:12px;"></div>
+      <button class="btn btn-sm btn-ghost hidden" id="copyPromptBtn" style="margin-top:8px;">Copy prompt</button>
+      <div class="field" style="margin-top:20px;">
+        <label class="field-label">Paste the summary back from ChatGPT / Claude</label>
+        <textarea id="summaryInput" rows="8" placeholder="Paste the AI's response here…">${esc(item.summary)}</textarea>
+      </div>
+      <div style="display:flex; gap:10px;">
+        ${!isNew ? `<button class="btn btn-danger" id="delBtn">Delete</button>` : ''}
+        <button class="btn btn-primary btn-full" id="saveBtn">Save</button>
+      </div>
+    </div>`;
+  document.body.appendChild(backdrop);
+  backdrop.onclick = (e)=>{ if(e.target===backdrop) backdrop.remove(); };
+  backdrop.querySelector('#closeSheet').onclick = ()=> backdrop.remove();
+  backdrop.querySelector('#genPromptBtn').onclick = ()=>{
+    const prompt = buildPrompt('week', jRange, kRange);
+    item.prompt = prompt;
+    const box = document.getElementById('promptBox'); box.textContent = prompt; box.classList.remove('hidden');
+    document.getElementById('copyPromptBtn').classList.remove('hidden');
+    document.getElementById('copyPromptBtn').onclick = ()=> navigator.clipboard.writeText(prompt).then(()=>showToast('Prompt copied'));
+  };
+  if(!isNew) backdrop.querySelector('#delBtn').onclick = async ()=>{
+    if(confirm('Delete this weekly review?')){ await dbDelete('weeklyReviews', item.id); backdrop.remove(); showToast('Deleted'); renderArchive(); }
+  };
+  backdrop.querySelector('#saveBtn').onclick = async ()=>{
+    item.summary = document.getElementById('summaryInput').value;
+    await dbPut('weeklyReviews', item);
+    backdrop.remove(); showToast('Weekly review saved'); renderArchive();
+  };
+}
+
+async function openMonthlySheet(key){
+  let item = await dbGet('monthlyReviews', key);
+  const isNew = !item;
+  item = item || { id:key, prompt:'', summary:'', createdAt:Date.now() };
+  const [journals, knowledge] = await Promise.all([dbGetAll('journal'), dbGetAll('knowledge')]);
+  const jRange = journals.filter(j=> j.date.slice(0,7)===key);
+  const kRange = knowledge.filter(k=> (k.date||'').slice(0,7)===key);
+  const monthLabel = new Date(key+'-01').toLocaleDateString(undefined,{month:'long', year:'numeric'});
+
+  const backdrop = document.createElement('div'); backdrop.className='sheet-backdrop';
+  backdrop.innerHTML = `
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-head"><h3>${monthLabel}</h3><button class="icon-btn" id="closeSheet">✕</button></div>
+      <button class="btn btn-ghost btn-full" id="genPromptBtn">✨ Generate AI prompt</button>
+      <div class="ai-prompt-box hidden" id="promptBox" style="margin-top:12px;"></div>
+      <button class="btn btn-sm btn-ghost hidden" id="copyPromptBtn" style="margin-top:8px;">Copy prompt</button>
+      <div class="field" style="margin-top:20px;">
+        <label class="field-label">Paste the summary back from ChatGPT / Claude</label>
+        <textarea id="summaryInput" rows="8" placeholder="Paste the AI's response here…">${esc(item.summary)}</textarea>
+      </div>
+      <div style="display:flex; gap:10px;">
+        ${!isNew ? `<button class="btn btn-danger" id="delBtn">Delete</button>` : ''}
+        <button class="btn btn-primary btn-full" id="saveBtn">Save</button>
+      </div>
+    </div>`;
+  document.body.appendChild(backdrop);
+  backdrop.onclick = (e)=>{ if(e.target===backdrop) backdrop.remove(); };
+  backdrop.querySelector('#closeSheet').onclick = ()=> backdrop.remove();
+  backdrop.querySelector('#genPromptBtn').onclick = ()=>{
+    const prompt = buildPrompt('month', jRange, kRange);
+    item.prompt = prompt;
+    const box = document.getElementById('promptBox'); box.textContent = prompt; box.classList.remove('hidden');
+    document.getElementById('copyPromptBtn').classList.remove('hidden');
+    document.getElementById('copyPromptBtn').onclick = ()=> navigator.clipboard.writeText(prompt).then(()=>showToast('Prompt copied'));
+  };
+  if(!isNew) backdrop.querySelector('#delBtn').onclick = async ()=>{
+    if(confirm('Delete this monthly review?')){ await dbDelete('monthlyReviews', item.id); backdrop.remove(); showToast('Deleted'); renderArchive(); }
+  };
+  backdrop.querySelector('#saveBtn').onclick = async ()=>{
+    item.summary = document.getElementById('summaryInput').value;
+    await dbPut('monthlyReviews', item);
+    backdrop.remove(); showToast('Monthly review saved'); renderArchive();
+  };
+}
+
+function buildPrompt(scope, journals, knowledge){
+  journals = [...journals].sort((a,b)=> a.date.localeCompare(b.date));
+  knowledge = [...knowledge].sort((a,b)=> a.date.localeCompare(b.date));
+  const jText = journals.map(j=> `${j.date}:\n${j.text || '(no entry)'}`).join('\n\n');
+  const kText = knowledge.map(k=> `${k.date} — ${k.title}: ${k.description}`).join('\n');
+  return `Please summarize my ${scope==='week'?'week':'month'}.\nFocus on:\n- recurring themes\n- emotional patterns\n- what I learned\n- how I'm changing over time\n- anything worth remembering long-term\n\nJournal entries:\n\n${jText || '(none logged)'}\n\nKnowledge learned:\n\n${kText || '(none logged)'}`;
+}
+
+/* ============================= SETTINGS ============================= */
+async function renderSettings(){
+  const el = document.getElementById('screen-settings');
+  const s = await dbGet('settings','app') || { key:'app', dark:false, lastBackup:null };
+  el.innerHTML = `
+    ${isStandalone() ? '' : `
+    <div class="card card-tight" style="margin-top:16px;">
+      <div class="row-between">
+        <div style="flex:1;">
+          <div class="s-title">Install Life OS</div>
+          <div class="s-sub">${isIOS() ? 'Add to your Home Screen for the full app experience.' : 'Add it to your home screen — works offline, opens like an app.'}</div>
+        </div>
+        <button class="btn btn-sm btn-primary" id="installBtn">${isIOS() ? 'How to' : 'Install'}</button>
+      </div>
+    </div>`}
+
+    <div class="card card-tight" style="margin-top:16px; display:flex; align-items:center; gap:14px;">
+      <div style="width:52px; height:52px; border-radius:50%; background-image:var(--photo-hero); background-size:cover; background-position:center; flex:none; border:1px solid var(--glass-border);"></div>
+      <div style="flex:1;">
+        <input type="text" id="nameInput" placeholder="Your name" value="${esc(s.name||'')}" style="border:none; background:transparent; padding:2px 0; font-weight:600; font-size:15.5px;">
+        <div class="faint" style="font-size:12px;">Keep growing.</div>
+      </div>
+    </div>
+
+    <div class="section-label">Appearance</div>
+    <div class="card card-tight">
+      <div class="settings-row">
+        <div><div class="s-title">Dark mode</div><div class="s-sub">Deep forest at night</div></div>
+        <div class="switch ${s.dark?'on':''}" id="darkSwitch"></div>
+      </div>
+    </div>
+
+    <div class="section-label">Your data</div>
+    <div class="card card-tight">
+      <div class="settings-row"><div><div class="s-title">Export JSON</div><div class="s-sub">Download everything</div></div><button class="btn btn-sm btn-ghost" id="expBtn">Export</button></div>
+      <div class="settings-row"><div><div class="s-title">Import JSON</div><div class="s-sub">Restore from a backup file</div></div><button class="btn btn-sm btn-ghost" id="impBtn">Import</button></div>
+      <div class="settings-row"><div><div class="s-title">Backup</div><div class="s-sub">${s.lastBackup ? 'Last backup: '+fmtDateShort(s.lastBackup) : 'Never backed up'}</div></div><button class="btn btn-sm btn-ghost" id="backupBtn">Back up now</button></div>
+      <input type="file" id="impFile" accept="application/json" style="display:none">
+    </div>
+
+    <div class="section-label">Danger zone</div>
+    <div class="card card-tight">
+      <div class="settings-row"><div><div class="s-title">Reset application</div><div class="s-sub">Erases everything on this device</div></div><button class="btn btn-sm btn-danger" id="resetBtn">Reset</button></div>
+    </div>
+
+    <div class="section-label">About</div>
+    <div class="card card-tight faint" style="line-height:1.7; font-size:13px;">
+      The user writes. Life OS remembers. AI understands.<br><br>
+      Life OS is a personal archive, not a journal app with opinions. It stores your days and what you've learned so that any AI — today or in the future — can understand your life in context. Life OS never calls an AI directly; it only prepares the prompt. You stay in control of when, and with whom, your reflections are shared.
+    </div>
+
+    <div class="hero-photo" style="border-radius:var(--r-lg); padding:34px 20px; text-align:center; margin-top:22px;">
+      <div class="display-italic" style="font-size:24px; color:#fff;">Life OS 🌿</div>
+      <div class="faint" style="color:rgba(255,255,255,0.82); font-size:13px; margin-top:6px;">Your second brain for growth.</div>
+      <div style="color:rgba(255,255,255,0.6); font-size:11px; margin-top:14px;">v2.0</div>
+    </div>
+  `;
+  const installBtn = document.getElementById('installBtn');
+  if(installBtn){
+    installBtn.onclick = async ()=>{
+      if(isIOS()){
+        openIOSInstallSheet();
+      } else if(deferredInstallPrompt){
+        deferredInstallPrompt.prompt();
+        await deferredInstallPrompt.userChoice;
+        deferredInstallPrompt = null;
+      } else {
+        showToast('Open this page in Chrome, then use "Add to Home screen"');
+      }
+    };
+  }
+  document.getElementById('nameInput').onblur = async (e)=>{ s.name = e.target.value; await dbPut('settings', s); };
+  document.getElementById('darkSwitch').onclick = async (e)=>{
+    s.dark = !s.dark; e.target.classList.toggle('on'); applyTheme(s.dark); await dbPut('settings', s);
+  };
+  document.getElementById('expBtn').onclick = ()=> exportData(false);
+  document.getElementById('backupBtn').onclick = ()=> exportData(true);
+  document.getElementById('impBtn').onclick = ()=> document.getElementById('impFile').click();
+  document.getElementById('impFile').onchange = importData;
+  document.getElementById('resetBtn').onclick = async ()=>{
+    if(confirm('This will permanently erase all journals, knowledge, and reviews on this device. Continue?')){
+      await dbClearAll(); showToast('Application reset'); setTab('home');
+    }
+  };
+}
+
+function applyTheme(dark){ document.documentElement.classList.toggle('dark', !!dark); }
+
+function openIOSInstallSheet(){
+  const backdrop = document.createElement('div'); backdrop.className='sheet-backdrop';
+  backdrop.innerHTML = `
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-head"><h3>Add to Home Screen</h3><button class="icon-btn" id="closeSheet">✕</button></div>
+      <div style="display:flex; gap:14px; align-items:flex-start; padding:14px 2px;">
+        <div class="k-icon" style="--ic:var(--icon-1); --icbg:var(--icon-1-bg);">1</div>
+        <div style="flex:1; padding-top:8px; font-size:14px;">Tap the <b>Share</b> icon in Safari's toolbar (the square with an arrow pointing up).</div>
+      </div>
+      <div style="display:flex; gap:14px; align-items:flex-start; padding:14px 2px;">
+        <div class="k-icon" style="--ic:var(--icon-2); --icbg:var(--icon-2-bg);">2</div>
+        <div style="flex:1; padding-top:8px; font-size:14px;">Scroll down and tap <b>Add to Home Screen</b>.</div>
+      </div>
+      <div style="display:flex; gap:14px; align-items:flex-start; padding:14px 2px;">
+        <div class="k-icon" style="--ic:var(--icon-3); --icbg:var(--icon-3-bg);">3</div>
+        <div style="flex:1; padding-top:8px; font-size:14px;">Tap <b>Add</b>. Life OS will open full-screen from your Home Screen, and works offline.</div>
+      </div>
+      <button class="btn btn-primary btn-full" id="gotItBtn" style="margin-top:10px;">Got it</button>
+    </div>`;
+  document.body.appendChild(backdrop);
+  backdrop.onclick = (e)=>{ if(e.target===backdrop) backdrop.remove(); };
+  backdrop.querySelector('#closeSheet').onclick = ()=> backdrop.remove();
+  backdrop.querySelector('#gotItBtn').onclick = ()=> backdrop.remove();
+}
+
+async function exportData(isBackup){
+  const [journal, knowledge, weeklyReviews, monthlyReviews] = await Promise.all(
+    ['journal','knowledge','weeklyReviews','monthlyReviews'].map(dbGetAll)
+  );
+  const content = JSON.stringify({exportedAt:new Date().toISOString(), journal, knowledge, weeklyReviews, monthlyReviews}, null, 2);
+  const blob = new Blob([content], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = `lifeos-${isBackup?'backup':'export'}-${todayISO()}.json`;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  if(isBackup){
+    const s = await dbGet('settings','app') || {key:'app'};
+    s.lastBackup = todayISO(); await dbPut('settings', s); renderSettings();
+  }
+  showToast(isBackup ? 'Backup saved' : 'Export downloaded');
+}
+
+async function importData(e){
+  const file = e.target.files[0]; if(!file) return;
+  try{
+    const data = JSON.parse(await file.text());
+    for(const store of ['journal','knowledge','weeklyReviews','monthlyReviews']){
+      if(Array.isArray(data[store])) for(const item of data[store]) await dbPut(store, item);
+    }
+    showToast('Import complete'); render();
+  }catch(err){ showToast('Import failed — invalid file'); }
+  e.target.value = '';
+}
+
+/* ============================= GLOBAL SEARCH ============================= */
+document.getElementById('searchOpenBtn').onclick = openGlobalSearch;
+async function openGlobalSearch(){
+  const backdrop = document.createElement('div'); backdrop.className='sheet-backdrop';
+  backdrop.innerHTML = `
+    <div class="sheet" style="max-height:92vh;">
+      <div class="sheet-handle"></div>
+      <div class="sheet-head"><h3>Search everything</h3><button class="icon-btn" id="closeSheet">✕</button></div>
+      <input type="search" id="gSearch" placeholder="Journal, knowledge, reviews…" autofocus>
+      <div id="gResults" style="margin-top:16px;"></div>
+    </div>`;
+  document.body.appendChild(backdrop);
+  backdrop.onclick = (e)=>{ if(e.target===backdrop) backdrop.remove(); };
+  backdrop.querySelector('#closeSheet').onclick = ()=> backdrop.remove();
+  const [journals, knowledge, weekly, monthly] = await Promise.all(
+    ['journal','knowledge','weeklyReviews','monthlyReviews'].map(dbGetAll)
+  );
+  const input = document.getElementById('gSearch');
+  input.oninput = ()=>{
+    const q = input.value.toLowerCase().trim();
+    const results = document.getElementById('gResults');
+    if(!q){ results.innerHTML=''; return; }
+    const jM = journals.filter(j=> (j.date+' '+j.text).toLowerCase().includes(q));
+    const kM = knowledge.filter(k=> (k.title+' '+k.description).toLowerCase().includes(q));
+    const wM = weekly.filter(w=> ((w.summary||'')+' '+w.startDate+' '+w.endDate).toLowerCase().includes(q));
+    const moM = monthly.filter(m=> ((m.summary||'')+' '+m.id).toLowerCase().includes(q));
+    if(!jM.length && !kM.length && !wM.length && !moM.length){ results.innerHTML = emptyState('🔎','No results','Try a different word or date.'); return; }
+    results.innerHTML = `
+      ${jM.length ? `<div class="section-label" style="margin-top:0;">Journal (${jM.length})</div>` + jM.slice(0,8).map(j=>`<div class="list-item" data-type="j" data-key="${j.date}"><div class="li-title">${j.date}</div><div class="li-desc">${esc(truncate(j.text,90))}</div></div>`).join('') : ''}
+      ${kM.length ? `<div class="section-label">Knowledge (${kM.length})</div>` + kM.slice(0,8).map((k,i)=>`<div class="list-item" data-type="k" data-i="${i}"><div class="li-title">${esc(k.title)}</div><div class="li-desc">${esc(truncate(k.description,90))}</div></div>`).join('') : ''}
+      ${wM.length ? `<div class="section-label">Weekly reviews (${wM.length})</div>` + wM.slice(0,8).map(w=>`<div class="list-item"><div class="li-title">${fmtDateShort(w.startDate)} – ${fmtDateShort(w.endDate)}</div><div class="li-desc">${esc(truncate(w.summary,90))}</div></div>`).join('') : ''}
+      ${moM.length ? `<div class="section-label">Monthly reviews (${moM.length})</div>` + moM.slice(0,8).map(m=>`<div class="list-item"><div class="li-title">${m.id}</div><div class="li-desc">${esc(truncate(m.summary,90))}</div></div>`).join('') : ''}
+    `;
+    results.querySelectorAll('.list-item[data-type="j"]').forEach(li=> li.onclick=()=>{ State.journalDate=li.dataset.key; backdrop.remove(); setTab('journal'); });
+    results.querySelectorAll('.list-item[data-type="k"]').forEach(li=> li.onclick=()=>{ backdrop.remove(); setTab('knowledge'); setTimeout(()=>openConceptSheet(kM[parseInt(li.dataset.i)]),150); });
+  };
+}
+
+/* ============================= INSTALL PROMPT ============================= */
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  if(State.tab==='settings') renderSettings();
+});
+window.addEventListener('appinstalled', ()=>{
+  deferredInstallPrompt = null;
+  showToast('Life OS installed');
+  if(State.tab==='settings') renderSettings();
+});
+function isStandalone(){
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+function isIOS(){
+  return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+
+/* ============================= BOOT ============================= */
+(async function init(){
+  await openDB();
+  const s = await dbGet('settings','app');
+  if(s){ applyTheme(s.dark); } else { await dbPut('settings', {key:'app', dark:false, lastBackup:null}); applyTheme(false); }
+  setTab('home');
+
+  if('serviceWorker' in navigator && (location.protocol==='https:' || location.hostname==='localhost')){
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  }
+})();
+</script>
+</body>
+</html>
